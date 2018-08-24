@@ -1,20 +1,19 @@
 'use strict';
 
-var gulp = require('gulp'),
-    gp = require('gulp-load-plugins')();
-    
+global.$ = {
+    gulp: require('gulp'),
+    gp: require('gulp-load-plugins')(),
+    browserSync: require('browser-sync').create(),
+    path: {
+        tasks: require('./gulp/config/tasks.js')
+    }
+};
 
-gulp.task('pug', function (){
-    return gulp.src('src/pug/pages/*.pug')
-    .pipe(gp.pug({
-        pretty:true
-    }))
-    .pipe(gulp.dest('build'));
-})
+$.path.tasks.forEach(function(taskPath) {
+    require(taskPath)();
+});
 
-gulp.task('sass', function (){
-    return gulp.src('src/static/scss/*.scss')
-    .pipe(gp.sass({}))
-    .pipe(gp.csso())
-    .pipe(gulp.dest('build/static/css/'));
-})
+$.gulp.task('default', $.gulp.series(
+    $.gulp.parallel('pug', 'sass', 'scripts:lib', 'scripts'),
+    $.gulp.parallel('watch', 'sync')
+));
